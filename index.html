@@ -198,7 +198,7 @@ a-scene{width:100vw;height:100vh;}
 <div id="scopeModal">
   <div class="modalBox">
     <h2>MICROSCOPE VIEW</h2>
-    <div class="sub">ORGANISM CLUSTERS (NOTE THEIR SHAPES)</div>
+    <div class="sub">ORGANISM CLUSTERS (COUNT THE ORGANISMS)</div>
     <div id="scopeImage"></div>
     <button id="scopeClose" class="modalClose">close microscope</button>
   </div>
@@ -282,7 +282,7 @@ a-scene{width:100vw;height:100vh;}
   <a-text id="goalText" value="RESTORE POWER." position="0 2.4 -3" align="center" width="5"
     color="#12181a" opacity="0"></a-text>
 
-  <!-- POWER PANEL (PUZZLE 1 - HARDER) -->
+  <!-- POWER PANEL (PUZZLE 1) -->
   <a-entity id="powerPanel" position="-5.5 1.4 -2">
     <a-plane width="1.8" height="1.4" rotation="0 40 0" material="color:#e8edf0; shader:flat"></a-plane>
     <a-text value="POWER RELAY" position="0 0.85 0" rotation="0 40 0" align="center"
@@ -300,7 +300,7 @@ a-scene{width:100vw;height:100vh;}
       width="2.2" color="#3a4749"></a-text>
   </a-entity>
 
-  <!-- LOG NEAR POWER PANEL -->
+  <!-- LOG NEAR POWER PANEL (PART 1 OF CODE) -->
   <a-entity position="-4.9 1.1 -1.2">
     <a-box class="clickable datapad" id="log1"
       data-title="PERSONAL LOG - DR. A. VOSS"
@@ -310,7 +310,17 @@ a-scene{width:100vw;height:100vh;}
       color="#3ddc8a"></a-text>
   </a-entity>
 
-  <!-- CORE SAMPLE (NOT RANDOM BALL) -->
+  <!-- SECOND JOURNAL (PART 3-4 OF CODE) -->
+  <a-entity position="-4.2 1.1 -2.4">
+    <a-box class="clickable datapad" id="log5"
+      data-title="SYSTEM NOTE - OVERRIDE"
+      data-body="Backup override schema updated after the last breach drill.%0A%0AAccess code now uses a split notation.%0A%0A(Handwritten below: OVERRIDE CODE - DIGITS 3-4: 2 7)"
+      width="0.35" height="0.05" depth="0.25" material="color:#2b3436; shader:flat"></a-box>
+    <a-text value="LOG" position="0 0.05 0.13" rotation="-90 0 0" align="center" width="1"
+      color="#3ddc8a"></a-text>
+  </a-entity>
+
+  <!-- CORE SAMPLE -->
   <a-entity position="-2 1 -3">
     <a-sphere class="clickable" id="sample" radius="0.18"
       material="color:#39ff88; shader:flat; opacity:0.85; transparent:true"></a-sphere>
@@ -391,10 +401,10 @@ a-scene{width:100vw;height:100vh;}
       material="color:#8a9a9c; shader:flat"></a-box>
   </a-entity>
 
-  <!-- AIRFLOW PURGE (PUSHED BACK) -->
+  <!-- AIRFLOW PURGE (AGAINST WALL, TEXT IN FRONT) -->
   <a-entity id="ventArea" position="6.5 1.3 -2.6" visible="false">
     <a-text value="AIRFLOW PURGE - SEQUENCE NOT LABELED"
-      position="0 0.75 0.15" rotation="0 -90 0" align="center" width="2.2" color="#3a4749"></a-text>
+      position="-0.25 0.9 0" rotation="0 -90 0" align="center" width="2.6" color="#3a4749"></a-text>
 
     <a-box class="clickable vent-btn" id="ventBtnAr" data-btn="Ar" position="0 0.3 -0.3"
       rotation="0 -90 0" width="0.26" height="0.26" depth="0.12"
@@ -544,7 +554,7 @@ function initGame() {
       material:'color:#c7d0d2; shader:flat'
     }));
 
-    // crates (reduced)
+    // crate
     root.appendChild(el('a-box',{
       position:'-6.3 0.3 -6.3',width:'0.6',height:'0.6',depth:'0.6',
       material:'color:#c98a4a; shader:flat'
@@ -588,7 +598,7 @@ function initGame() {
       position:`${originX+1.4} ${originY-0.75} -6.94`,align:'center',width:'4.6',color:'#3a4749'
     }));
 
-    // extra log
+    // extra ethics log
     root.appendChild(el('a-box',{
       id:'log3',class:'clickable datapad',position:'-3.0 1.1 -6.7',width:'0.35',height:'0.05',depth:'0.25',
       material:'color:#2b3436; shader:flat',
@@ -807,7 +817,7 @@ function initGame() {
       document.getElementById('ventArea').setAttribute('visible',true);
       document.getElementById('stageName').textContent = 'MICROSCOPE & CONSOLE';
       document.getElementById('stageHint').textContent = 'Observe the organisms and unlock the console.';
-      setObjective('Use the microscope to study organism clusters. Their shapes hint at a PIN for the console.');
+      setObjective('Use the microscope to study organism clusters. The number of organisms in each cluster corresponds to digits of a PIN.');
     } else {
       playSound('sfx-error');
       toast('Wrong reagent. Contamination surges.');
@@ -815,22 +825,20 @@ function initGame() {
     }
   });
 
-  // MICROSCOPE VIEW (TEXT ORGANISMS)
+  // MICROSCOPE VIEW (CLUSTERS WHERE COUNT = DIGIT)
+  // PIN digits: 7, 3, 9, 2  -> total organisms per cluster match these
   const scopeArt =
 `Cluster A:
-  ○○
-  ○○○
-   ○
+  ○ ○ ○ ○ ○ ○ ○
 
 Cluster B:
-  ▢
-  ▢▢
-   ▢▢
+  ▢ ▢ ▢
 
 Cluster C:
-   △
-  △△
-  △  △`;
+  △ △ △ △ △ △ △ △ △
+
+Cluster D:
+  ✶ ✶`;
 
   document.getElementById('microscope').addEventListener('click',()=>{
     if (state.stage !== 'scope') return;
@@ -842,7 +850,7 @@ Cluster C:
     document.getElementById('scopeModal').classList.remove('active');
   });
 
-  // CONSOLE PIN
+  // CONSOLE PIN (MATCHES CLUSTER COUNTS)
   const CONSOLE_PIN = '7392';
   function updateConsoleDisplay(wrong){
     const disp = document.getElementById('consoleDisplay');
@@ -927,7 +935,7 @@ Cluster C:
     });
   });
 
-  // PIN TERMINAL (FINAL CODE)
+  // PIN TERMINAL (FINAL CODE FROM LOGS 1 + 5)
   const PIN_CODE = '4127';
   function updatePinDisplay(wrong){
     const disp = document.getElementById('pinDisplay');
